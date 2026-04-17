@@ -88,6 +88,16 @@ git push -u origin main
 
 ---
 
+## ⚠️ Web Service vs Background Worker?
+
+**Background Worker** é o correto para seu bot Telegram porque:
+- ✅ O bot não precisa de porta HTTP aberta
+- ✅ Roda continuamente ouvindo mensagens
+- ✅ Mais barato (não consome recursos de frontend)
+- ❌ Web Service é para APIs e sites com HTTP
+
+---
+
 ## 3️⃣ Criar PostgreSQL no Render
 
 1. **Acesse https://render.com** e faça login
@@ -111,7 +121,9 @@ git push -u origin main
 
 ## 4️⃣ Deploy da Aplicação Flask + Bot
 
-1. **Clique em "New +"** → **Web Service**
+⚠️ **IMPORTANTE:** Use "Background Worker" (não Web Service) porque o bot não precisa de porta HTTP.
+
+1. **Clique em "New +"** → **Background Worker**
 
 2. **Conecte seu GitHub:**
    - Clique em "Connect a repository"
@@ -124,7 +136,7 @@ git push -u origin main
    - **Branch:** `main`
    - **Runtime:** `Python 3`
    - **Build Command:** `pip install -r requirements.txt`
-   - **Start Command:** `python app/bot_service.py`
+   - **Start Command:** `python bot.py`
 
 4. **Clique em "Advanced"** e configure as variáveis de ambiente:
    - Clique em **"Add Environment Variable"**
@@ -135,7 +147,7 @@ git push -u origin main
      FLASK_ENV = production
      ```
 
-5. **Clique em "Create Web Service"**
+5. **Clique em "Create Background Worker"**
 
 6. **Espere o deploy** (pode levar 2-3 minutos)
 
