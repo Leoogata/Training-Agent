@@ -117,3 +117,7 @@ def register_series(message):
 
         except Exception:
             bot.send_message(chat_id, "❌ Formato inválido! Envie: 'peso reps' (ex: 50 10)")
+
+# Só roda se executado diretamente (não é importado)
+if __name__ == "__main__":
+    bot.infinity_polling()

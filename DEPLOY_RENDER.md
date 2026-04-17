@@ -88,13 +88,13 @@ git push -u origin main
 
 ---
 
-## ⚠️ Web Service vs Background Worker?
+## ⚠️ Por que Web Service (não Background Worker)?
 
-**Background Worker** é o correto para seu bot Telegram porque:
-- ✅ O bot não precisa de porta HTTP aberta
-- ✅ Roda continuamente ouvindo mensagens
-- ✅ Mais barato (não consome recursos de frontend)
-- ❌ Web Service é para APIs e sites com HTTP
+**Background Worker** não tem plano free no Render. Por isso, usamos **Web Service** com um truque:
+- ✅ O bot roda em uma **thread separada** em background
+- ✅ Flask escuta requisições HTTP (porta 5000)
+- ✅ Render mantém vivo porque há porta HTTP
+- ✅ 100% gratuito!
 
 ---
 
@@ -121,9 +121,7 @@ git push -u origin main
 
 ## 4️⃣ Deploy da Aplicação Flask + Bot
 
-⚠️ **IMPORTANTE:** Use "Background Worker" (não Web Service) porque o bot não precisa de porta HTTP.
-
-1. **Clique em "New +"** → **Background Worker**
+1. **Clique em "New +"** → **Web Service**
 
 2. **Conecte seu GitHub:**
    - Clique em "Connect a repository"
@@ -136,7 +134,7 @@ git push -u origin main
    - **Branch:** `main`
    - **Runtime:** `Python 3`
    - **Build Command:** `pip install -r requirements.txt`
-   - **Start Command:** `python bot.py`
+   - **Start Command:** `python run.py`
 
 4. **Clique em "Advanced"** e configure as variáveis de ambiente:
    - Clique em **"Add Environment Variable"**
@@ -147,7 +145,7 @@ git push -u origin main
      FLASK_ENV = production
      ```
 
-5. **Clique em "Create Background Worker"**
+5. **Clique em "Create Web Service"**
 
 6. **Espere o deploy** (pode levar 2-3 minutos)
 
@@ -215,6 +213,26 @@ O Render **automaticamente detecta** e **faz redeploy** em alguns segundos!
 - ✅ Web Service: Até 750 horas/mês (24/7)
 - ⚠️ Inatividade: Dorme após 15 min sem requisição (o bot vai acordar quando receber mensagem)
 - 💰 Upgrade: A partir de $7/mês para serviço sempre ativo
+
+---
+
+## 🔧 Como Funciona (Technically Speaking)
+
+O `run.py` faz o seguinte:
+
+```python
+# 1. Cria uma thread separada para o bot
+bot_thread = threading.Thread(target=run_bot, daemon=True)
+bot_thread.start()
+
+# 2. Inicia o servidor Flask na porta 5000
+app.run(host='0.0.0.0', port=port)
+```
+
+**Resultado:**
+- ✅ Bot roda 24/7 em background (thread separada)
+- ✅ Flask fica escutando na porta 5000 (mantém Render vivo)
+- ✅ Sem custo adicional!
 
 ---
 
