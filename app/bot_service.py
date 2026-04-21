@@ -1,20 +1,26 @@
 import telebot
+import os
 from telebot import types
-from app import create_app, db
 from app.models import Workout, Exercise, WorkoutLog, ExerciseLog
+from app import db
 
-# Inicializa o app Flask para ter acesso ao banco (Contexto)
-app = create_app()
-app.app_context().push()
-
-TOKEN = "8697158652:AAHnOLuZ-Nw2nEsaRL4itHOvTcbzg_nPnU8"
+# Carrega o token da variável de ambiente
+TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 bot = telebot.TeleBot(TOKEN)
+
+# Variável global para armazenar a instância do app Flask
+flask_app = None
+
+def set_flask_app(app):
+    global flask_app
+    flask_app = app
 
 user_status = {}
 
 @bot.message_handler(commands=['start'])
 def start_workout(message):
-    with app.app_context():
+    if not flask_app: return
+    with flask_app.app_context():
         workouts = Workout.query.all()
         
         if not workouts:
@@ -41,7 +47,8 @@ def reset_workout(message):
 
 @bot.message_handler(func=lambda message: message.chat.id not in user_status)
 def select_workout(message):
-    with app.app_context():
+    if not flask_app: return
+    with flask_app.app_context():
         workout = Workout.query.filter_by(name=message.text).first()
         if not workout:
             bot.send_message(message.chat.id, "Por favor, escolha um treino válido.")
@@ -63,7 +70,8 @@ def select_workout(message):
         proximo_passo(message.chat.id)
 
 def proximo_passo(chat_id):
-    with app.app_context():
+    if not flask_app: return
+    with flask_app.app_context():
         status = user_status[chat_id]
         workout = Workout.query.get(status['workout_id'])
 
@@ -96,7 +104,8 @@ def proximo_passo(chat_id):
 
 @bot.message_handler(func=lambda message: message.chat.id in user_status)
 def register_series(message):
-    with app.app_context():
+    if not flask_app: return
+    with flask_app.app_context():
         chat_id = message.chat.id
         status = user_status[chat_id]
         
@@ -127,6 +136,9 @@ def register_series(message):
         except Exception:
             bot.send_message(chat_id, "❌ Formato inválido! Envie: 'peso reps' (ex: 50 10)")
 
-# Só roda se executado diretamente (não é importado)
 if __name__ == "__main__":
+    # Para testes locais, criamos um app temporário
+    from app import create_app
+    app = create_app()
+    set_flask_app(app)
     bot.infinity_polling()
