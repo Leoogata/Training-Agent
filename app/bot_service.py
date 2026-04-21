@@ -30,6 +30,15 @@ def start_workout(message):
         message_text = "Qual treino vamos fazer hoje?\n\nTreinos disponíveis:\n" + "\n".join(workouts_list)
         bot.send_message(message.chat.id, message_text, reply_markup=markup)
 
+@bot.message_handler(commands=['reset'])
+def reset_workout(message):
+    chat_id = message.chat.id
+    if chat_id in user_status:
+        del user_status[chat_id]
+        bot.reply_to(message, "🔄 Sessão reiniciada! Use /start para começar um novo treino.")
+    else:
+        bot.reply_to(message, "Você não tem uma sessão ativa no momento. Use /start para começar.")
+
 @bot.message_handler(func=lambda message: message.chat.id not in user_status)
 def select_workout(message):
     with app.app_context():
