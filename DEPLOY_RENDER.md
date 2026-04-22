@@ -88,13 +88,11 @@ git push -u origin main
 
 ---
 
-## ⚠️ Por que Web Service (não Background Worker)?
+## ⚠️ Por que usar Webhooks no Render?
 
-**Background Worker** não tem plano free no Render. Por isso, usamos **Web Service** com um truque:
-- ✅ O bot roda em uma **thread separada** em background
-- ✅ Flask escuta requisições HTTP (porta 5000)
-- ✅ Render mantém vivo porque há porta HTTP
-- ✅ 100% gratuito!
+O plano **Free** do Render coloca o serviço para "dormir" após 15 minutos de inatividade. 
+- **Antes (Polling):** O bot não recebia mensagens enquanto dormia, pois o Telegram não "acordava" o servidor.
+- **Agora (Webhooks):** O bot está configurado para usar Webhooks no Render. Sempre que você envia uma mensagem, o Telegram faz uma requisição HTTP para o seu servidor, o que **acorda o serviço automaticamente**.
 
 ---
 
@@ -142,6 +140,7 @@ git push -u origin main
      ```
      DATABASE_URL = (copie a URL completa do banco PostgreSQL)
      TELEGRAM_BOT_TOKEN = (seu token do bot)
+     RENDER_EXTERNAL_URL = (a URL do seu app, ex: https://seu-app.onrender.com)
      FLASK_ENV = production
      ```
 
@@ -211,7 +210,7 @@ O Render **automaticamente detecta** e **faz redeploy** em alguns segundos!
 
 - ✅ PostgreSQL: Até 1GB de dados
 - ✅ Web Service: Até 750 horas/mês (24/7)
-- ⚠️ Inatividade: Dorme após 15 min sem requisição (o bot vai acordar quando receber mensagem)
+- ✅ **Inatividade:** O serviço dorme após 15 min, mas **acorda sozinho** assim que você mandar qualquer mensagem para o bot no Telegram (graças ao Webhook)!
 - 💰 Upgrade: A partir de $7/mês para serviço sempre ativo
 
 ---
