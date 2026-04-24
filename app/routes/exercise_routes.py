@@ -19,7 +19,7 @@ def get_all_exercise():
         }
         output.append(exercise_data)
 
-    return jsonify({output})
+    return jsonify(output)
     
 @exercise_bp.route('/exercise/<int:id>', methods=['GET'])
 def get_exercise(id):
